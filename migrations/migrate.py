@@ -28,7 +28,7 @@ def get_db_connection():
 def ensure_migrations_table(conn):
     with conn.cursor() as cur:
         cur.execute("""
-            CREATE TABLE IF NOT EXISTS _migrations (
+            CREATE TABLE IF NOT EXISTS schema_migrations (
                 id SERIAL PRIMARY KEY,
                 filename TEXT UNIQUE NOT NULL,
                 applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -39,14 +39,16 @@ def ensure_migrations_table(conn):
 
 def get_applied_migrations(conn):
     with conn.cursor() as cur:
-        cur.execute("SELECT filename FROM _migrations;")
+        cur.execute("SELECT filename FROM schema_migrations;")
         return {row[0] for row in cur.fetchall()}
 
 
 def apply_migration(conn, filename, sql):
     with conn.cursor() as cur:
         cur.execute(sql)
-        cur.execute("INSERT INTO _migrations (filename) VALUES (%s);", (filename,))
+        cur.execute(
+            "INSERT INTO schema_migrations (filename) VALUES (%s);", (filename,)
+        )
     conn.commit()
 
 
