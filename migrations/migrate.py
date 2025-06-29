@@ -72,5 +72,8 @@ def run():
     conn.close()
 
 
+# TODO: Create an error log table to log issues with migrations
+
+
 if __name__ == "__main__":
     run()
