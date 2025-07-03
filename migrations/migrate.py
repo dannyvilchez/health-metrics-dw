@@ -30,11 +30,16 @@ def ensure_migrations_table_exists(conn: Connection) -> None:
         cur.execute("""
             CREATE TABLE IF NOT EXISTS schema_migrations (
                 MigrationID BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                filename TEXT UNIQUE NOT NULL,
-                applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                Filename TEXT UNIQUE NOT NULL,
+                AppliedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
     conn.commit()
+
+def get_applied_migrations(conn: Connection) -> set[str]:
+    with conn.cursor() as cur:
+        cur.execute("SELECT filename FROM schema_migrations;")
+        return {row[0] for row in cur.fetchall()}
 
 
 def main():
@@ -51,6 +56,10 @@ def main():
         cur.execute("SELECT * FROM schema_migrations")
         rows = cur.fetchall()
         print(rows)
+
+    applied = get_applied_migrations(conn)
+
+    print(applied)
 
 
 if __name__ == "__main__":
