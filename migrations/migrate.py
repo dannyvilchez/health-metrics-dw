@@ -42,8 +42,13 @@ def main():
 
     conn = connect_to_database()
 
+    ensure_migrations_table_exists(conn)
+
     with conn.cursor() as cur:
-        cur.execute("SELECT * FROM test_table;")
+        cur.execute("""
+            INSERT INTO schema_migrations (filename) VALUES ('test_file');
+        """)
+        cur.execute("SELECT * FROM schema_migrations")
         rows = cur.fetchall()
         print(rows)
 
