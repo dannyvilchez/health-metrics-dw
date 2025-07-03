@@ -41,6 +41,8 @@ def get_applied_migrations(conn: Connection) -> set[str]:
         cur.execute("SELECT filename FROM schema_migrations;")
         return {row[0] for row in cur.fetchall()}
 
+def apply_migration():
+    pass
 
 def main():
     load_environment_variables(ENV_PATH)
