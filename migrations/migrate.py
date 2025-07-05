@@ -56,15 +56,14 @@ def apply_migrations(conn: Connection, file_path: str) -> None:
         print(f"Applied {filename} to database")
     conn.commit()
 
+
 def main():
     load_environment_variables(ENV_PATH)
     conn = connect_to_database()
 
     ensure_migrations_table_exists(conn)
     applied = get_applied_migrations(conn)
-    print("Applied: ", applied)
     file_list = sorted(os.listdir(MIGRATION_PATH))
-    print("file list: ", file_list)
 
     """
     This the main loop that applies the migrations to the database.
