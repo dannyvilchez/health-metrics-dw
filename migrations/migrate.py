@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 from datetime import datetime
 
 
-ENV_FILENAME = ".env"
-ENV_PATH = os.path.abspath(ENV_FILENAME)
+ENV_PATH = os.path.abspath(".env")
+MIGRATION_PATH = os.path.abspath("migrations/")
 
 
 def load_environment_variables(env: str) -> None:
@@ -46,29 +46,30 @@ def get_applied_migrations(conn: Connection) -> set[str]:
 
 
 def apply_migrations(conn: Connection, file_path) -> None:
-    filename = parse_filename(os.path.basename(file_path))
+    filename = os.path.splitext(os.path.basename(file_path))[0]
     with open(file_path, "r") as f:
         sql = f.read()
     with conn.cursor() as cur:
         cur.execute(sql)
         cur.execute(
             "INSERT INTO schema_migrations (Filename) VALUES (%s);",
-            (filename),
+            (filename,),
         )
-    cur.commit()
+        print(f"Applied {filename} to database")
+    conn.commit()
 
 
-def parse_filename(filename: str) -> str:
-    match = re.match(r"^(\d{8}_.+)\.sql$", filename)
-
-    if not match:
-        raise ValueError(
-            f"Filename '{filename}' is not in the expected format: YYYYMMDD_filename.sql"
-        )
-
-    filename = match.group(1)
-
-    return filename
+# def parse_filename(filename: str) -> str:
+#     match = re.match(r"^\d{8}_.+\.sql$", filename)
+#
+#     if not match:
+#         raise ValueError(
+#             f"Filename '{filename}' is not in the expected format: YYYYMMDD_filename.sql"
+#         )
+#
+#     filename = match.group(1)
+#
+#     return filename
 
 
 def main():
@@ -77,7 +78,9 @@ def main():
 
     ensure_migrations_table_exists(conn)
     applied = get_applied_migrations(conn)
-    file_list = sorted(os.listdir("migrations"))
+    print("Applied: ", applied)
+    file_list = sorted(os.listdir(MIGRATION_PATH))
+    print("file list: ", file_list)
 
     """
     This the main loop that applies the migrations to the database.
@@ -85,16 +88,16 @@ def main():
     decided against it because there's no major complexity here that 
     I want to develop or test separately. And there's no branching in it.
     """
-    for file in all_files:
+    
+    for file in file_list:
         if file.endswith(".sql") and file not in applied:
-            apply_migrations(conn, os.path.join("migrations", file))
+            apply_migrations(conn, os.path.join(MIGRATION_PATH, file))
 
     with conn.cursor() as cur:
         cur.execute("SELECT * FROM schema_migrations")
         rows = cur.fetchall()
         print(rows)
 
-    print(applied)
 
 
 if __name__ == "__main__":
