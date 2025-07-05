@@ -1,9 +1,7 @@
 import os
-import re
 import psycopg
 from psycopg import Connection
 from dotenv import load_dotenv
-from datetime import datetime
 
 
 ENV_PATH = os.path.abspath(".env")
@@ -12,7 +10,7 @@ MIGRATION_PATH = os.path.abspath("migrations/")
 
 def load_environment_variables(env: str) -> None:
     if not os.path.exists(env):
-        raise Exception(f"{env} does not exists")
+        raise Exception(f"{env} does not exist")
 
     load_dotenv(env)
 
@@ -45,7 +43,7 @@ def get_applied_migrations(conn: Connection) -> set[str]:
         return {row[0] for row in cur.fetchall()}
 
 
-def apply_migrations(conn: Connection, file_path) -> None:
+def apply_migrations(conn: Connection, file_path: str) -> None:
     filename = os.path.splitext(os.path.basename(file_path))[0]
     with open(file_path, "r") as f:
         sql = f.read()
@@ -57,20 +55,6 @@ def apply_migrations(conn: Connection, file_path) -> None:
         )
         print(f"Applied {filename} to database")
     conn.commit()
-
-
-# def parse_filename(filename: str) -> str:
-#     match = re.match(r"^\d{8}_.+\.sql$", filename)
-#
-#     if not match:
-#         raise ValueError(
-#             f"Filename '{filename}' is not in the expected format: YYYYMMDD_filename.sql"
-#         )
-#
-#     filename = match.group(1)
-#
-#     return filename
-
 
 def main():
     load_environment_variables(ENV_PATH)
@@ -102,3 +86,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
