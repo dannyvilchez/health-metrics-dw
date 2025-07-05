@@ -31,18 +31,30 @@ def ensure_migrations_table_exists(conn: Connection) -> None:
             CREATE TABLE IF NOT EXISTS schema_migrations (
                 MigrationID BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                 Filename TEXT UNIQUE NOT NULL,
+                FileDate TIMESTAMP NOT NULL,
                 AppliedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
     conn.commit()
+
 
 def get_applied_migrations(conn: Connection) -> set[str]:
     with conn.cursor() as cur:
         cur.execute("SELECT filename FROM schema_migrations;")
         return {row[0] for row in cur.fetchall()}
 
-def apply_migration():
+
+def apply_migration(conn: Connection, filename: str):
+    with conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO schema_migrations (Filename, FileDate) VALUES (%s, %s);", ()
+        )
+    cur.commit()
+
+
+def parse_date(filename: str) -> str:
     pass
+
 
 def main():
     load_environment_variables(ENV_PATH)
