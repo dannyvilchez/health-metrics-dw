@@ -1,7 +1,9 @@
 import os
+import re
 import psycopg
 from psycopg import Connection
 from dotenv import load_dotenv
+from datetime import datetime
 
 
 ENV_FILENAME = ".env"
@@ -45,15 +47,27 @@ def get_applied_migrations(conn: Connection) -> set[str]:
 
 
 def apply_migration(conn: Connection, filename: str):
+    filedate, filename = parse_filename(filename)
     with conn.cursor() as cur:
         cur.execute(
-            "INSERT INTO schema_migrations (Filename, FileDate) VALUES (%s, %s);", ()
+            "INSERT INTO schema_migrations (Filename, FileDate) VALUES (%s, %s);",
+            (filename, filedate),
         )
     cur.commit()
 
 
-def parse_date(filename: str) -> str:
-    pass
+def parse_filename(filename: str) -> tuple[datetime, str]:
+    match = re.match(r"^(\d{8})_(.+)\.sql$", filename)
+
+    if not match:
+        raise ValueError(
+            f"Filename '{filename}' is not in the expected format: YYYYMMDD_filename.sql"
+        )
+
+    filedate = datetime.strptime(match.group(1), "%Y%m%d")
+    filename = match.group(2)
+
+    return filedate, filename
 
 
 def main():
