@@ -40,7 +40,7 @@ def ensure_migrations_table_exists(conn: Connection) -> None:
 def get_applied_migrations(conn: Connection) -> set[str]:
     with conn.cursor() as cur:
         cur.execute("SELECT filename FROM schema_migrations;")
-        return {row[0] for row in cur.fetchall()}
+        return {row[0] + ".sql" for row in cur.fetchall()}
 
 
 def apply_migrations(conn: Connection, file_path: str) -> None:
@@ -63,6 +63,7 @@ def main():
 
     ensure_migrations_table_exists(conn)
     applied = get_applied_migrations(conn)
+    print(applied)
     file_list = sorted(os.listdir(MIGRATION_PATH))
 
     """
@@ -71,8 +72,9 @@ def main():
     decided against it because there's no major complexity here that 
     I want to develop or test separately. And there's no branching in it.
     """
-    
+
     for file in file_list:
+        print(file)
         if file.endswith(".sql") and file not in applied:
             apply_migrations(conn, os.path.join(MIGRATION_PATH, file))
 
@@ -82,7 +84,5 @@ def main():
         print(rows)
 
 
-
 if __name__ == "__main__":
     main()
-
