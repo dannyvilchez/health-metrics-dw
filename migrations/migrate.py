@@ -63,7 +63,6 @@ def main():
 
     ensure_migrations_table_exists(conn)
     applied = get_applied_migrations(conn)
-    print(applied)
     file_list = sorted(os.listdir(MIGRATION_PATH))
 
     """
@@ -74,14 +73,13 @@ def main():
     """
 
     for file in file_list:
-        print(file)
         if file.endswith(".sql") and file not in applied:
             apply_migrations(conn, os.path.join(MIGRATION_PATH, file))
 
-    with conn.cursor() as cur:
-        cur.execute("SELECT * FROM schema_migrations")
-        rows = cur.fetchall()
-        print(rows)
+    # with conn.cursor() as cur:
+    #     cur.execute("SELECT * FROM schema_migrations")
+    #     rows = cur.fetchall()
+    #     print(rows)
 
 
 if __name__ == "__main__":
