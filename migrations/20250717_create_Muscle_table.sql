@@ -1,7 +1,8 @@
 CREATE TABLE dw.Muscle (
     MuscleID            SMALLINT        GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     MuscleCategoryID    SMALLINT        REFERENCES dw.MuscleCategory (MuscleCategoryID), 
-    Muscle              VARCHAR(20)     NOT NULL
+    Muscle              VARCHAR(20)     NOT NULL,
+    UNIQUE (MuscleCategoryID, Muscle)
 );
 
 

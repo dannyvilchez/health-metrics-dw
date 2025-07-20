@@ -1,6 +1,6 @@
 CREATE TABLE dw.MuscleCategory (
-    MuscleCategoryID   SMALLINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    MuscleCategory     VARCHAR(10)    NOT NULL
+    MuscleCategoryID   SMALLINT       GENERATED ALWAYS AS IDENTITY  PRIMARY KEY,
+    MuscleCategory     VARCHAR(10)    NOT NULL UNIQUE
 );
 
 
